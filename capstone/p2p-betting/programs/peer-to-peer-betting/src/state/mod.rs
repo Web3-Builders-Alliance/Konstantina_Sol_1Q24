@@ -10,6 +10,7 @@ pub enum Winner {
 pub enum State {
     Open,
     Cancelled,
+    Accepted,
     Settled
 }
 

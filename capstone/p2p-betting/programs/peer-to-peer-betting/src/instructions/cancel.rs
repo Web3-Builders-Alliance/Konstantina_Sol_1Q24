@@ -4,7 +4,6 @@ use anchor_spl::token::{close_account, CloseAccount};
 use crate::state::Bet;
 
 #[derive(Accounts)]
-#[instruction(description: String)]
 pub struct Cancel<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
@@ -28,6 +27,7 @@ pub struct Cancel<'info> {
     )]
     pub bet: Account<'info, Bet>,
     #[account(
+        mut,
         seeds = [
             b"vault",
             bet.key().as_ref(),
@@ -47,33 +47,18 @@ impl <'info> Cancel<'info> {
             to: self.maker.to_account_info(),
         };
 
-        let opponent = self.bet.opponent.key();
-        let judge = self.bet.judge.key();
-        let seeds = [
-            b"bet",
-            self.maker.key.as_ref(),
-            opponent.as_ref(),
-            judge.as_ref(),
-            self.bet.description.as_str().as_bytes(),
-            &[self.bet.bump]
-        ];
+        // let opponent = self.bet.opponent.key();
+        // let judge = self.bet.judge.key();
+        // let seeds = [
+        //     b"bet",
+        //     self.maker.key.as_ref(),
+        //     self.opponent.key.as_ref(),
+        //     self.judge.key.as_ref(),
+        //     self.bet.description.as_str().as_bytes(),
+        //     &[self.bet.bump]
+        // ];
 
-        let signer_seeds: &[&[&[u8]]; 1] = &[&seeds[..]];
-
-        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-
-        transfer(cpi_ctx, self.bet.amount)
-    }
-
-    pub fn close_account(&mut self) -> Result<()> {
-        let cpi_program = self.system_program.to_account_info();
-
-        let cpi_accounts = CloseAccount {
-            account: self.vault.to_account_info(),
-            destination: self.maker.to_account_info(),
-            authority: self.bet.to_account_info(),
-        };
-
+        // the vault needs to sign here, not the bet/escrow account!
         let bet_key = self.bet.key();
         let seeds = [
             b"vault",
@@ -85,6 +70,30 @@ impl <'info> Cancel<'info> {
 
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
 
-        close_account(cpi_ctx)
+        transfer(cpi_ctx, self.bet.amount)
     }
+
+    // we don't need to do that because vault is a system account - we just empty it
+    // pub fn close_account(&mut self) -> Result<()> {
+    //     let cpi_program = self.system_program.to_account_info();
+
+    //     let cpi_accounts = CloseAccount {
+    //         account: self.vault.to_account_info(),
+    //         destination: self.maker.to_account_info(),
+    //         authority: self.bet.to_account_info(),
+    //     };
+
+    //     let bet_key = self.bet.key();
+    //     let seeds = [
+    //         b"vault",
+    //         bet_key.as_ref(),
+    //         &[self.bet.vault_bump]
+    //     ];
+
+    //     let signer_seeds: &[&[&[u8]]; 1] = &[&seeds[..]];
+
+    //     let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+
+    //     close_account(cpi_ctx)
+    // }
 }

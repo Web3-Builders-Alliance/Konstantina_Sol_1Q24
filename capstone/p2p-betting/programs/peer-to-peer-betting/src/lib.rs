@@ -23,7 +23,6 @@ pub mod peer_to_peer_betting {
 
     // Maker cancels their open bet and gets refunded
     pub fn cancel(ctx: Context<Cancel>) -> Result<()> {
-        ctx.accounts.refund_to_maker()?;
-        ctx.accounts.close_account()
+        ctx.accounts.refund_to_maker()
     }
 }

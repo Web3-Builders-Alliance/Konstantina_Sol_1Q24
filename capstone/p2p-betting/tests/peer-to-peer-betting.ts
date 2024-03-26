@@ -20,7 +20,7 @@ describe("peer_to_peer_betting", () => {
       maker.publicKey.toBuffer(),
       taker.publicKey.toBuffer(),
       judge.publicKey.toBuffer(),
-      Buffer.from("test"),
+      Buffer.from("test"), // description: test
     ],
     program.programId
   )[0];
@@ -51,7 +51,7 @@ describe("peer_to_peer_betting", () => {
 
   it("airdrop", async () => {
     await connection
-      .requestAirdrop(maker.publicKey, LAMPORTS_PER_SOL * 100)
+      .requestAirdrop(maker.publicKey, LAMPORTS_PER_SOL * 10)
       .then(confirm)
       .then(log);
 
@@ -80,6 +80,27 @@ describe("peer_to_peer_betting", () => {
     // assert the bet vault has 1 sol deposited from the maker
     const vaultBalance = await connection.getBalance(vault);
     assert.equal(vaultBalance, 1e9);
+  });
+
+  it("maker can cancel a bet", async () => {
+    const tx = await program.methods
+    .cancel()
+    .accounts({
+      maker: maker.publicKey,
+      opponent: taker.publicKey,
+      judge: judge.publicKey,
+      bet,
+      vault,
+      systemProgram: SystemProgram.programId
+    })
+    .signers([maker])
+    .rpc()
+    .then(confirm)
+    .then(log)
+
+    // assert maker has gotten the 1 sol back
+    const makerBalance = await connection.getBalance(maker.publicKey);
+    assert.equal(makerBalance, LAMPORTS_PER_SOL * 10);
   });
 
 });
