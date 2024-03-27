@@ -3,7 +3,6 @@ use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
 use crate::{state::Bet, State};
 
 #[derive(Accounts)]
-#[instruction(description: String)]
 pub struct Take<'info> {
     #[account(mut)]
     pub opponent: Signer<'info>, // the taker
@@ -26,6 +25,7 @@ pub struct Take<'info> {
     )]
     pub bet: Account<'info, Bet>,
     #[account(
+        mut,
         seeds = [
             b"vault",
             bet.key().as_ref(),

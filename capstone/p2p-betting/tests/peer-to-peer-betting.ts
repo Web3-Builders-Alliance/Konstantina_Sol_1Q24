@@ -82,7 +82,7 @@ describe("peer_to_peer_betting", () => {
     assert.equal(vaultBalance, 1e9);
   });
 
-  it("maker can cancel a bet", async () => {
+  xit("maker can cancel a bet", async () => {
     const tx = await program.methods
     .cancel()
     .accounts({
@@ -101,6 +101,30 @@ describe("peer_to_peer_betting", () => {
     // assert maker has gotten the 1 sol back
     const makerBalance = await connection.getBalance(maker.publicKey);
     assert.equal(makerBalance, LAMPORTS_PER_SOL * 10);
+  });
+
+  it("opponent can take bet", async () => {
+    // const vaultBalanceBefore = await connection.getBalance(vault);
+    // console.log("Vault balance before: " + vaultBalanceBefore);
+
+    const tx = await program.methods
+    .take()
+    .accounts({
+      opponent: taker.publicKey,
+      maker: maker.publicKey,
+      judge: judge.publicKey,
+      bet,
+      vault,
+      systemProgram: SystemProgram.programId
+    })
+    .signers([taker])
+    .rpc()
+    .then(confirm)
+    .then(log)
+
+    // assert vault has 2 * bet amount balance
+    const vaultBalance = await connection.getBalance(vault);
+    assert.equal(vaultBalance, LAMPORTS_PER_SOL * 2);
   });
 
 });

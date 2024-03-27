@@ -25,4 +25,9 @@ pub mod peer_to_peer_betting {
     pub fn cancel(ctx: Context<Cancel>) -> Result<()> {
         ctx.accounts.refund_to_maker()
     }
+
+    // Taler accepts bet and sends their stake into the vault
+    pub fn take(ctx: Context<Take>) -> Result<()> {
+        ctx.accounts.take_bet()
+    }
 }
