@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
+import { AnchorError, Program } from "@coral-xyz/anchor";
 import { Keypair, LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
 import { PeerToPeerBetting } from "../target/types/peer_to_peer_betting";
 import { assert } from "chai";
@@ -57,6 +57,11 @@ describe("peer_to_peer_betting", () => {
 
     await connection
       .requestAirdrop(taker.publicKey, LAMPORTS_PER_SOL * 10)
+      .then(confirm)
+      .then(log);
+
+    await connection
+      .requestAirdrop(judge.publicKey, LAMPORTS_PER_SOL * 1)
       .then(confirm)
       .then(log);
   });
@@ -125,6 +130,66 @@ describe("peer_to_peer_betting", () => {
     // assert vault has 2 * bet amount balance
     const vaultBalance = await connection.getBalance(vault);
     assert.equal(vaultBalance, LAMPORTS_PER_SOL * 2);
+  });
+
+
+  it("non-judge pubkeys can't settle the bet", async () => {
+    // must come before the judge can settle test (or skip it)
+    // because otherwise the bet account will be closed
+
+    try {
+      const tx = await program.methods
+      .settleBet(1)
+      .accounts({
+        judge: maker.publicKey, // maker tries to settle the bet
+        maker: maker.publicKey,
+        taker: taker.publicKey,
+        bet,
+        vault,
+        systemProgram: SystemProgram.programId
+      })
+      .signers([maker])
+      .rpc()
+      .then(confirm)
+      .then(log)
+
+      // ✔ Error: AnchorError caused by account: bet. Error Code: ConstraintHasOne. Error Number: 2001. Error Message: A has one constraint was violated.
+      assert.ok(false);
+    }
+    catch (_err) {
+      assert.isTrue(_err instanceof AnchorError);
+      const err: AnchorError = _err;
+      assert.strictEqual(err.error.errorCode.code, 'ConstraintHasOne');
+    }
+  });
+
+  it("judge can settle bet with the maker as the winner", async () => {
+    const tx = await program.methods
+    .settleBet(1)
+    .accounts({
+      judge: judge.publicKey,
+      maker: maker.publicKey,
+      taker: taker.publicKey,
+      bet,
+      vault,
+      systemProgram: SystemProgram.programId
+    })
+    .signers([judge])
+    .rpc()
+    .then(confirm)
+    .then(log)
+
+    // assert vault is empty
+    const vaultBalance = await connection.getBalance(vault);
+    assert.equal(vaultBalance, 0);
+
+    // assert winner got the vault deposit
+    const makerBalance = await connection.getBalance(maker.publicKey);
+    assert.equal(makerBalance, 11 * LAMPORTS_PER_SOL);
+
+    // // assert loser didn't get sent anything
+    const takerBalance = await connection.getBalance(taker.publicKey);
+    assert.equal(takerBalance, 9 * LAMPORTS_PER_SOL);
   });
 
 });

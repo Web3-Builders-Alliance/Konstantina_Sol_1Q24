@@ -26,8 +26,16 @@ pub mod peer_to_peer_betting {
         ctx.accounts.refund_to_maker()
     }
 
-    // Taler accepts bet and sends their stake into the vault
+    // Taker accepts bet and sends their stake into the vault
     pub fn take(ctx: Context<Take>) -> Result<()> {
         ctx.accounts.take_bet()
+    }
+
+    // Judge settles bet
+    pub fn settle_bet(ctx: Context<SettleBet>, winner: u8) -> Result<()> {
+        match winner {
+            1 | 2 => ctx.accounts.select_winner(winner),
+            _ => ctx.accounts.refund_bet()
+        }
     }
 }
