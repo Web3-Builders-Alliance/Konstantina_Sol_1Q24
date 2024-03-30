@@ -2,6 +2,8 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Custom error message")]
-    CustomError,
+    #[msg("The taker has already deposited")]
+    TakerAlreadyDeposited,
+    #[msg("Not both players have sent their deposit")]
+    PlayersNotDeposited,
 }

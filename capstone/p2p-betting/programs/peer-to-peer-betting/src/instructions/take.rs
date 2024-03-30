@@ -41,6 +41,7 @@ impl <'info> Take<'info> {
 
         // Mark bet as accepted
         self.bet.state = State::Accepted;
+        self.bet.players_deposited = true;
 
         // Deposit into the vault
         let accounts = Transfer {

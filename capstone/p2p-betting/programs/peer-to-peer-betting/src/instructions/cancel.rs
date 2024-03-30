@@ -1,6 +1,7 @@
 use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
 
 use crate::state::Bet;
+use crate::error::ErrorCode;
 
 #[derive(Accounts)]
 pub struct Cancel<'info> {
@@ -39,6 +40,12 @@ pub struct Cancel<'info> {
 
 impl <'info> Cancel<'info> {
     pub fn refund_to_maker(&mut self) -> Result<()> {
+        // if the opponent has already sent their deposit, the maker shouldn't be able to cancel
+
+        if self.bet.players_deposited {
+            return Err(ErrorCode::TakerAlreadyDeposited.into());
+        }
+
         let cpi_program = self.system_program.to_account_info();
 
         let cpi_accounts = Transfer {

@@ -1,6 +1,7 @@
 use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
 
 use crate::state::Bet;
+use crate::error::ErrorCode;
 
 // settle bet: the judge either selects the winner or cancels the bet and players get refunded
 
@@ -40,6 +41,10 @@ pub struct SettleBet<'info> {
 
 impl <'info> SettleBet<'info> {
     pub fn select_winner(&mut self, winner : u8) -> Result<()> {
+        if !self.bet.players_deposited {
+            return Err(ErrorCode::PlayersNotDeposited.into());
+        }
+
         // send vault balance to the winner
         let recipient = match winner {
             // maker
@@ -72,6 +77,10 @@ impl <'info> SettleBet<'info> {
     }
 
     pub fn refund_bet(&mut self) -> Result<()> {
+        if !self.bet.players_deposited {
+            return Err(ErrorCode::PlayersNotDeposited.into());
+        }
+
         let cpi_program = self.system_program.to_account_info();
 
         let bet_key = self.bet.key();

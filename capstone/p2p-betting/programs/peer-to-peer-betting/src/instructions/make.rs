@@ -45,6 +45,7 @@ impl <'info> Make<'info> {
         self.bet.judge = self.judge.key();
         self.bet.amount = amount;
         self.bet.description = description;
+        self.bet.players_deposited = false;
         self.bet.bump = bumps.bet;
         self.bet.vault_bump = bumps.vault;
 

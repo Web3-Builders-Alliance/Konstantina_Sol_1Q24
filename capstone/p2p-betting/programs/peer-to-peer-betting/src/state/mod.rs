@@ -24,6 +24,7 @@ pub struct Bet {
     // pub seed: u64, // probably not needed if we use the description in the seeds
     pub state: State, // open/cancelled/settled
     pub winner: Winner, // maker/taker
+    pub players_deposited: bool,
     pub bump: u8,
     pub vault_bump: u8,
 }

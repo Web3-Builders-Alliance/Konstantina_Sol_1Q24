@@ -108,6 +108,33 @@ describe("peer_to_peer_betting", () => {
     assert.equal(makerBalance, LAMPORTS_PER_SOL * 10);
   });
 
+
+  it("judge can't settle a bet before the taker has deposited", async () => {
+    try {
+      const tx = await program.methods
+        .settleBet(0)
+        .accounts({
+          judge: judge.publicKey,
+          maker: maker.publicKey,
+          taker: taker.publicKey,
+          bet,
+          vault,
+          systemProgram: SystemProgram.programId
+        })
+        .signers([judge])
+        .rpc()
+        .then(confirm)
+        .then(log)
+
+      assert.ok(false);
+    }
+    catch (_err) {
+      assert.isTrue(_err instanceof AnchorError);
+      const err: AnchorError = _err;
+      assert.strictEqual(err.error.errorCode.code, 'PlayersNotDeposited');
+    }
+  });
+
   it("opponent can take bet", async () => {
     // const vaultBalanceBefore = await connection.getBalance(vault);
     // console.log("Vault balance before: " + vaultBalanceBefore);
@@ -132,6 +159,32 @@ describe("peer_to_peer_betting", () => {
     assert.equal(vaultBalance, LAMPORTS_PER_SOL * 2);
   });
 
+
+  it("maker can't cancel a bet after taker has deposited", async () => {
+    try {
+      const tx = await program.methods
+      .cancel()
+      .accounts({
+        maker: maker.publicKey,
+        opponent: taker.publicKey,
+        judge: judge.publicKey,
+        bet,
+        vault,
+        systemProgram: SystemProgram.programId
+      })
+      .signers([maker])
+      .rpc()
+      .then(confirm)
+      .then(log);
+
+      assert.ok(false);
+    }
+    catch (_err) {
+      assert.isTrue(_err instanceof AnchorError);
+      const err: AnchorError = _err;
+      assert.strictEqual(err.error.errorCode.code, 'TakerAlreadyDeposited');
+    }
+  });
 
   it("non-judge pubkeys can't settle the bet", async () => {
     // must come before the judge can settle test (or skip it)
@@ -216,7 +269,7 @@ describe("peer_to_peer_betting", () => {
     const takerBalance = await connection.getBalance(taker.publicKey);
     assert.equal(takerBalance, 11 * LAMPORTS_PER_SOL);
 
-    // // assert loser didn't get sent anything
+    // assert loser didn't get sent anything
     const makerBalance = await connection.getBalance(maker.publicKey);
     assert.equal(makerBalance, 9 * LAMPORTS_PER_SOL);
   });
@@ -249,6 +302,9 @@ describe("peer_to_peer_betting", () => {
     // assert taker got their deposit back
     const takerBalance = await connection.getBalance(taker.publicKey);
     assert.equal(takerBalance, 10 * LAMPORTS_PER_SOL);
+
+    // let account_data = await connection.getAccountInfo(bet, "processed");
+    // console.log(account_data);
   });
 
 });
