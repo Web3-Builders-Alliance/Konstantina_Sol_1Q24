@@ -1,5 +1,4 @@
 use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
-use anchor_spl::token::{close_account, CloseAccount};
 
 use crate::state::Bet;
 

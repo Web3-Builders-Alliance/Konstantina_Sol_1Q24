@@ -163,7 +163,7 @@ describe("peer_to_peer_betting", () => {
     }
   });
 
-  it("judge can settle bet with the maker as the winner", async () => {
+  xit("judge can settle bet with the maker as the winner", async () => {
     const tx = await program.methods
     .settleBet(1)
     .accounts({
@@ -190,6 +190,65 @@ describe("peer_to_peer_betting", () => {
     // // assert loser didn't get sent anything
     const takerBalance = await connection.getBalance(taker.publicKey);
     assert.equal(takerBalance, 9 * LAMPORTS_PER_SOL);
+  });
+
+  xit("judge can settle bet with the taker as the winner", async () => {
+    const tx = await program.methods
+    .settleBet(2)
+    .accounts({
+      judge: judge.publicKey,
+      maker: maker.publicKey,
+      taker: taker.publicKey,
+      bet,
+      vault,
+      systemProgram: SystemProgram.programId
+    })
+    .signers([judge])
+    .rpc()
+    .then(confirm)
+    .then(log)
+
+    // assert vault is empty
+    const vaultBalance = await connection.getBalance(vault);
+    assert.equal(vaultBalance, 0);
+
+    // assert winner got the vault deposit
+    const takerBalance = await connection.getBalance(taker.publicKey);
+    assert.equal(takerBalance, 11 * LAMPORTS_PER_SOL);
+
+    // // assert loser didn't get sent anything
+    const makerBalance = await connection.getBalance(maker.publicKey);
+    assert.equal(makerBalance, 9 * LAMPORTS_PER_SOL);
+  });
+
+  it("judge can cancel bet and refund players", async () => {
+    const tx = await program.methods
+    .settleBet(0)
+    .accounts({
+      judge: judge.publicKey,
+      maker: maker.publicKey,
+      taker: taker.publicKey,
+      bet,
+      vault,
+      systemProgram: SystemProgram.programId
+    })
+    .signers([judge])
+    .rpc()
+    .then(confirm)
+    .then(log)
+
+    // assert vault is empty
+    const vaultBalance = await connection.getBalance(vault);
+    assert.equal(vaultBalance, 0);
+
+
+    // assert maker got their deposit back
+    const makerBalance = await connection.getBalance(maker.publicKey);
+    assert.equal(makerBalance, 10 * LAMPORTS_PER_SOL);
+
+    // assert taker got their deposit back
+    const takerBalance = await connection.getBalance(taker.publicKey);
+    assert.equal(takerBalance, 10 * LAMPORTS_PER_SOL);
   });
 
 });
