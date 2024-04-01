@@ -226,18 +226,6 @@ export type PeerToPeerBetting = {
             "type": "string"
           },
           {
-            "name": "state",
-            "type": {
-              "defined": "State"
-            }
-          },
-          {
-            "name": "winner",
-            "type": {
-              "defined": "Winner"
-            }
-          },
-          {
             "name": "playersDeposited",
             "type": "bool"
           },
@@ -248,42 +236,6 @@ export type PeerToPeerBetting = {
           {
             "name": "vaultBump",
             "type": "u8"
-          }
-        ]
-      }
-    }
-  ],
-  "types": [
-    {
-      "name": "Winner",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Maker"
-          },
-          {
-            "name": "Taker"
-          }
-        ]
-      }
-    },
-    {
-      "name": "State",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Open"
-          },
-          {
-            "name": "Cancelled"
-          },
-          {
-            "name": "Accepted"
-          },
-          {
-            "name": "Settled"
           }
         ]
       }
@@ -531,18 +483,6 @@ export const IDL: PeerToPeerBetting = {
             "type": "string"
           },
           {
-            "name": "state",
-            "type": {
-              "defined": "State"
-            }
-          },
-          {
-            "name": "winner",
-            "type": {
-              "defined": "Winner"
-            }
-          },
-          {
             "name": "playersDeposited",
             "type": "bool"
           },
@@ -553,42 +493,6 @@ export const IDL: PeerToPeerBetting = {
           {
             "name": "vaultBump",
             "type": "u8"
-          }
-        ]
-      }
-    }
-  ],
-  "types": [
-    {
-      "name": "Winner",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Maker"
-          },
-          {
-            "name": "Taker"
-          }
-        ]
-      }
-    },
-    {
-      "name": "State",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Open"
-          },
-          {
-            "name": "Cancelled"
-          },
-          {
-            "name": "Accepted"
-          },
-          {
-            "name": "Settled"
           }
         ]
       }
