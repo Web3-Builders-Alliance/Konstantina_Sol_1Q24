@@ -1,10 +1,16 @@
 'use client';
 
 import { useConnection, useWallet, useAnchorWallet, AnchorWallet } from '@solana/wallet-adapter-react';
+import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
+  Connection,
+  Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
+  TransactionMessage,
+  TransactionSignature,
+  VersionedTransaction,
 } from '@solana/web3.js';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -17,6 +23,102 @@ import { AnchorProvider, BN, Program } from '@coral-xyz/anchor';
 const PEER_TO_PEER_BETTING_PROGRAM_ID = new PublicKey(
     'CXE5bjWmUv7QAivvg6gjZTvZ246F99mCaKTNKoAuCCDc' // devnet
 );
+
+export function useGetBets() {
+  const { connection } = useConnection();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useQuery({
+    queryKey: ['get-bets', { endpoint: connection.rpcEndpoint }],
+    queryFn: () => program.account.bet.all()
+  });
+}
+
+export function useGetBetsByMaker({ address }: { address: PublicKey }) {
+  // Get all bets with address as maker
+  const { connection } = useConnection();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useQuery({
+    queryKey: ['get-bets-maker', { endpoint: connection.rpcEndpoint, address }],
+    queryFn: () => {
+      const accounts = program.account.bet.all(([
+        {
+          memcmp: {
+            offset: 8,
+            bytes: address.toBase58(), // first field in the bet account (see idl)
+          },
+        },
+      ]));
+
+      return accounts;
+    },
+  });
+}
+
+export function useGetBetsByTaker({ address }: { address: PublicKey }) {
+  // Get all bets with address as taker
+  const { connection } = useConnection();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useQuery({
+    queryKey: ['get-bets-taker', { endpoint: connection.rpcEndpoint, address }],
+    queryFn: () => {
+      const accounts = program.account.bet.all(([
+        {
+          memcmp: {
+            offset: 8 + 32, // anchor discriminator, maker publicKey, opponent publicKey
+            bytes: address.toBase58(),
+          },
+        },
+      ]));
+
+      return accounts;
+    },
+  });
+}
+
+export function useGetBetsByJudge({ address }: { address: PublicKey }) {
+  // Get all bets with address as judge
+  const { connection } = useConnection();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useQuery({
+    queryKey: ['get-bets-judge', { endpoint: connection.rpcEndpoint, address }],
+    queryFn: () => {
+      const accounts = program.account.bet.all(([
+        {
+          memcmp: {
+            offset: 8 + 32 + 32,
+            bytes: address.toBase58(),
+          },
+        },
+      ]));
+
+      return accounts;
+    },
+  });
+}
 
 export function useMakeBet({ address }: { address: PublicKey }) { // address: the connected wallet ??
   const { connection } = useConnection();

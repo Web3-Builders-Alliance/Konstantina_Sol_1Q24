@@ -13,6 +13,7 @@ const links: { label: string; path: string }[] = [
   { label: 'Account', path: '/account' },
   { label: 'Clusters', path: '/clusters' },
   { label: 'Bet', path: '/bet' },
+  { label: 'Pending Bets', path: '/list-bets' },
 ];
 
 export default function RootLayout({
