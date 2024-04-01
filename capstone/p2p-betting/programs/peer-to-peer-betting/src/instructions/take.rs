@@ -1,6 +1,6 @@
 use anchor_lang::{prelude::*, system_program::{transfer, Transfer}};
 
-use crate::{state::Bet, State};
+use crate::state::Bet;
 
 #[derive(Accounts)]
 pub struct Take<'info> {
@@ -40,7 +40,6 @@ impl <'info> Take<'info> {
     pub fn take_bet(&mut self) -> Result<()> {
 
         // Mark bet as accepted
-        self.bet.state = State::Accepted;
         self.bet.players_deposited = true;
 
         // Deposit into the vault
