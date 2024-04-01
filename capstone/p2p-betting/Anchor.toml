@@ -7,11 +7,18 @@ skip-lint = false
 [programs.localnet]
 peer_to_peer_betting = "GNvd7Px5uSBF6F8a1ZtvZsjShEPDL1F93AfS8PrcweXv"
 
+[programs.devnet]
+peer_to_peer_betting = "CXE5bjWmUv7QAivvg6gjZTvZ246F99mCaKTNKoAuCCDc"
+
 [registry]
 url = "https://api.apr.dev"
 
+# [provider]
+# cluster = "Localnet"
+# wallet = "/Users/konstantina/.config/solana/id.json"
+
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "/Users/konstantina/.config/solana/id.json"
 
 [scripts]

@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("GNvd7Px5uSBF6F8a1ZtvZsjShEPDL1F93AfS8PrcweXv");
+declare_id!("CXE5bjWmUv7QAivvg6gjZTvZ246F99mCaKTNKoAuCCDc");
 
 #[program]
 pub mod peer_to_peer_betting {
