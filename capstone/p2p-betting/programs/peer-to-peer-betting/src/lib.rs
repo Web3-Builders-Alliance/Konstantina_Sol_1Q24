@@ -8,7 +8,6 @@ use anchor_lang::prelude::*;
 pub use constants::*;
 pub use instructions::*;
 pub use state::*;
-pub use error::*;
 
 declare_id!("GNvd7Px5uSBF6F8a1ZtvZsjShEPDL1F93AfS8PrcweXv");
 
@@ -30,6 +29,11 @@ pub mod peer_to_peer_betting {
     // Taker accepts bet and sends their stake into the vault
     pub fn take(ctx: Context<Take>) -> Result<()> {
         ctx.accounts.take_bet()
+    }
+
+    // Taker declines bet
+    pub fn decline(ctx: Context<Decline>) -> Result<()> {
+        ctx.accounts.decline()
     }
 
     // Judge settles bet

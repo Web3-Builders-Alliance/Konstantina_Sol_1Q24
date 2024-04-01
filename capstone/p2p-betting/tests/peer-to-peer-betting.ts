@@ -135,6 +135,26 @@ describe("peer_to_peer_betting", () => {
     }
   });
 
+  xit("opponent can decline bet", async () => {
+    const tx = await program.methods
+    .decline()
+    .accounts({
+      opponent: taker.publicKey,
+      maker: maker.publicKey,
+      bet,
+      vault,
+      systemProgram: SystemProgram.programId
+    })
+    .signers([taker])
+    .rpc()
+    .then(confirm)
+    .then(log)
+
+    // assert maker has gotten the 1 sol back
+    const makerBalance = await connection.getBalance(maker.publicKey);
+    assert.equal(makerBalance, LAMPORTS_PER_SOL * 10);
+  });
+
   it("opponent can take bet", async () => {
     // const vaultBalanceBefore = await connection.getBalance(vault);
     // console.log("Vault balance before: " + vaultBalanceBefore);
@@ -159,7 +179,6 @@ describe("peer_to_peer_betting", () => {
     assert.equal(vaultBalance, LAMPORTS_PER_SOL * 2);
   });
 
-
   it("maker can't cancel a bet after taker has deposited", async () => {
     try {
       const tx = await program.methods
@@ -173,6 +192,31 @@ describe("peer_to_peer_betting", () => {
         systemProgram: SystemProgram.programId
       })
       .signers([maker])
+      .rpc()
+      .then(confirm)
+      .then(log);
+
+      assert.ok(false);
+    }
+    catch (_err) {
+      assert.isTrue(_err instanceof AnchorError);
+      const err: AnchorError = _err;
+      assert.strictEqual(err.error.errorCode.code, 'TakerAlreadyDeposited');
+    }
+  });
+
+  it("taker can't cancel a bet after they have accepted/deposited", async () => {
+    try {
+      const tx = await program.methods
+      .decline()
+      .accounts({
+        maker: maker.publicKey,
+        opponent: taker.publicKey,
+        bet,
+        vault,
+        systemProgram: SystemProgram.programId
+      })
+      .signers([taker])
       .rpc()
       .then(confirm)
       .then(log);
