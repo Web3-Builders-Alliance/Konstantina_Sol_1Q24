@@ -2,7 +2,7 @@
 
 import { useAnchorWallet, useWallet } from '@solana/wallet-adapter-react';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { IconRefresh } from '@tabler/icons-react';
+import { IconRefresh, IconArrowUpRight } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { AppModal, ellipsify } from '../ui/ui-layout';
 import { useCluster } from '../cluster/cluster-data-access';
@@ -77,6 +77,7 @@ export function BetsList({ address, filterBy = "any" }: { address: PublicKey, fi
                   <th>Judge</th>
                   <th>Description</th>
                   <th className="text-right">Amount</th>
+                  <th className="text-right">See More</th>
                 </tr>
               </thead>
               <tbody>
@@ -131,7 +132,17 @@ export function BetsList({ address, filterBy = "any" }: { address: PublicKey, fi
                     </td>
                     <td className="text-right">
                       <span className="font-mono">
-                        {Math.round((account.amount.toNumber() / LAMPORTS_PER_SOL) * 100000) / 100000}
+                        {Math.round((account.amount.toNumber() / LAMPORTS_PER_SOL) * 100000) / 100000} SOL
+                      </span>
+                    </td>
+                    <td className="flex justify-center">
+                      <span className="font-mono">
+                        <a
+                          href={`/bet/${publicKey.toString()}`}
+                          className="link"
+                        >
+                          <IconArrowUpRight size={18} />
+                        </a>
                       </span>
                     </td>
                   </tr>

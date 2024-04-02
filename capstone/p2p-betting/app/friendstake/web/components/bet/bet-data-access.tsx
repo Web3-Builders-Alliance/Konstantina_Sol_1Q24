@@ -1,16 +1,10 @@
 'use client';
 
 import { useConnection, useWallet, useAnchorWallet, AnchorWallet } from '@solana/wallet-adapter-react';
-import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
-  Connection,
-  Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
-  TransactionMessage,
-  TransactionSignature,
-  VersionedTransaction,
 } from '@solana/web3.js';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -36,6 +30,22 @@ export function useGetBets() {
   return useQuery({
     queryKey: ['get-bets', { endpoint: connection.rpcEndpoint }],
     queryFn: () => program.account.bet.all()
+  });
+}
+
+export function useGetBet({ address }: { address: PublicKey }) {
+  // Fetch specific bet
+  const { connection } = useConnection();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useQuery({
+    queryKey: ['get-bet', { endpoint: connection.rpcEndpoint, address }],
+    queryFn: () => program.account.bet.fetch(address)
   });
 }
 
