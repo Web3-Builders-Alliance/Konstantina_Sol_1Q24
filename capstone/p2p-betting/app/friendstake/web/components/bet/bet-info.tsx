@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 import { ExplorerLink } from '../cluster/cluster-ui';
 import { AppHero, ellipsify } from '../ui/ui-layout';
 
-import { BetButtons, BetsList } from './bet-ui';
+import { BetButtons, BetMakerButtons, BetsList } from './bet-ui';
 import { useGetBet } from './bet-data-access';
 
 export default function BetInfo() {
@@ -44,7 +44,7 @@ export default function BetInfo() {
             }
           >
             <div className="my-4">
-              <BetButtons address={address} />
+              <BetMakerButtons address={address} maker={account.data?.maker}/>
             </div>
           </AppHero>
 

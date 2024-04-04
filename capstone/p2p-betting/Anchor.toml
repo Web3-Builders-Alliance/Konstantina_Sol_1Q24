@@ -4,8 +4,8 @@
 seeds = false
 skip-lint = false
 
-[programs.localnet]
-peer_to_peer_betting = "GNvd7Px5uSBF6F8a1ZtvZsjShEPDL1F93AfS8PrcweXv"
+# [programs.localnet]
+# peer_to_peer_betting = "GNvd7Px5uSBF6F8a1ZtvZsjShEPDL1F93AfS8PrcweXv"
 
 [programs.devnet]
 peer_to_peer_betting = "CXE5bjWmUv7QAivvg6gjZTvZ246F99mCaKTNKoAuCCDc"

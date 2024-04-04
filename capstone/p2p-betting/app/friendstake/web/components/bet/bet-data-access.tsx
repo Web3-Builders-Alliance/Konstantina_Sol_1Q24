@@ -185,3 +185,50 @@ export function useMakeBet({ address }: { address: PublicKey }) { // address: th
     },
   });
 }
+
+export function useCancelBet({ address }: { address: PublicKey }) { // address: bet
+  const { connection } = useConnection();
+  const transactionToast = useTransactionToast();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useMutation({
+    mutationKey: ['cancel-bet', { endpoint: connection.rpcEndpoint, address }],
+    mutationFn: async () => {
+
+      const bet_data = await program.account.bet.fetch(address);
+
+      const vault = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("vault"),
+          address.toBuffer(),
+        ],
+        program.programId
+      )[0];
+
+      const tx = await program.methods
+        .cancel()
+        .accounts({
+            maker: bet_data.maker,
+            opponent: bet_data.opponent,
+            judge: bet_data.judge,
+            bet: address,
+            vault,
+            systemProgram: SystemProgram.programId
+        })
+        .rpc();
+
+        return tx;
+    },
+    onSuccess: (signature) => {
+      transactionToast(signature);
+    },
+    onError: (error) => {
+      toast.error(`Transaction failed! ${error}`);
+    },
+  });
+}

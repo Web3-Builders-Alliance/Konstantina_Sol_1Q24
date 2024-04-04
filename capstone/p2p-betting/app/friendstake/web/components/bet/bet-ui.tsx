@@ -5,9 +5,8 @@ import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { IconRefresh, IconArrowUpRight } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { AppModal, ellipsify } from '../ui/ui-layout';
-import { useCluster } from '../cluster/cluster-data-access';
 import { ExplorerLink } from '../cluster/cluster-ui';
-import { useGetBets, useGetBetsByJudge, useGetBetsByMaker, useGetBetsByTaker, useMakeBet } from './bet-data-access';
+import { useCancelBet, useGetBets, useGetBetsByJudge, useGetBetsByMaker, useGetBetsByTaker, useMakeBet } from './bet-data-access';
 
 export function BetsList({ address, filterBy = "any" }: { address: PublicKey, filterBy?: string }) {
   const [showAll, setShowAll] = useState(false);
@@ -150,7 +149,7 @@ export function BetsList({ address, filterBy = "any" }: { address: PublicKey, fi
 
                 {(query.data?.length ?? 0) > 5 && (
                   <tr>
-                    <td colSpan={4} className="text-center">
+                    <td colSpan={6} className="text-center">
                       <button
                         className="btn btn-xs btn-outline"
                         onClick={() => setShowAll(!showAll)}
@@ -169,10 +168,8 @@ export function BetsList({ address, filterBy = "any" }: { address: PublicKey, fi
   );
 }
 
-
 export function BetButtons({ address }: { address: PublicKey }) {
     const wallet = useWallet();
-    const { cluster } = useCluster();
     const [showCreateBetModal, setShowCreateBetModal] = useState(false);
 
     return (
@@ -277,3 +274,27 @@ function ModalCreateBet({
       </AppModal>
     );
   }
+
+export function BetMakerButtons({ address, maker }: { address: PublicKey, maker?: PublicKey }) {
+  const wallet = useWallet();
+  const mutation = useCancelBet({ address });
+
+  return (
+    <div>
+      <div className="space-x-2">
+        <button
+          disabled={!maker || wallet.publicKey?.toString() !== maker?.toString()}
+          className="btn btn-xs lg:btn-md btn-outline"
+          onClick={() => {
+            mutation
+              .mutateAsync()
+              .then(() => {
+              });
+          }}
+        >
+          Cancel Bet
+        </button>
+      </div>
+    </div>
+  );
+}
