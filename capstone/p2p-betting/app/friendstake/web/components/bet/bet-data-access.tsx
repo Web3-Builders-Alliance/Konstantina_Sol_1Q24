@@ -232,3 +232,142 @@ export function useCancelBet({ address }: { address: PublicKey }) { // address: 
     },
   });
 }
+
+export function useDeclineBet({ address }: { address: PublicKey }) { // address: bet
+  const { connection } = useConnection();
+  const transactionToast = useTransactionToast();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useMutation({
+    mutationKey: ['decline-bet', { endpoint: connection.rpcEndpoint, address }],
+    mutationFn: async () => {
+
+      const bet_data = await program.account.bet.fetch(address);
+
+      const vault = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("vault"),
+          address.toBuffer(),
+        ],
+        program.programId
+      )[0];
+
+      const tx = await program.methods
+        .decline()
+        .accounts({
+            maker: bet_data.maker,
+            opponent: bet_data.opponent,
+            bet: address,
+            vault,
+            systemProgram: SystemProgram.programId
+        })
+        .rpc();
+
+        return tx;
+    },
+    onSuccess: (signature) => {
+      transactionToast(signature);
+    },
+    onError: (error) => {
+      toast.error(`Transaction failed! ${error}`);
+    },
+  });
+}
+
+export function useTakeBet({ address }: { address: PublicKey }) { // address: bet
+  const { connection } = useConnection();
+  const transactionToast = useTransactionToast();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useMutation({
+    mutationKey: ['take-bet', { endpoint: connection.rpcEndpoint, address }],
+    mutationFn: async () => {
+
+      const bet_data = await program.account.bet.fetch(address);
+
+      const vault = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("vault"),
+          address.toBuffer(),
+        ],
+        program.programId
+      )[0];
+
+      const tx = await program.methods
+        .take()
+        .accounts({
+            maker: bet_data.maker,
+            opponent: bet_data.opponent,
+            judge: bet_data.judge,
+            bet: address,
+            vault,
+            systemProgram: SystemProgram.programId
+        })
+        .rpc();
+
+        return tx;
+    },
+    onSuccess: (signature) => {
+      transactionToast(signature);
+    },
+    onError: (error) => {
+      toast.error(`Transaction failed! ${error}`);
+    },
+  });
+}
+
+export function useSettleBet({ address }: { address: PublicKey }) { // address: bet
+  const { connection } = useConnection();
+  const transactionToast = useTransactionToast();
+  const wallet = useAnchorWallet();
+  const provider = new AnchorProvider(connection, wallet as AnchorWallet, {
+    commitment: 'confirmed',
+  });
+
+  const program = new Program(IDL, PEER_TO_PEER_BETTING_PROGRAM_ID, provider);
+
+  return useMutation({
+    mutationKey: ['settle-bet', { endpoint: connection.rpcEndpoint, address }],
+    mutationFn: async (input: {winner: number}) => {
+      const bet_data = await program.account.bet.fetch(address);
+
+      const vault = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("vault"),
+          address.toBuffer(),
+        ],
+        program.programId
+      )[0];
+
+      const tx = await program.methods
+        .settleBet(input.winner)
+        .accounts({
+            maker: bet_data.maker,
+            taker: bet_data.opponent,
+            judge: bet_data.judge,
+            bet: address,
+            vault,
+            systemProgram: SystemProgram.programId
+        })
+        .rpc();
+
+        return tx;
+    },
+    onSuccess: (signature) => {
+      transactionToast(signature);
+    },
+    onError: (error) => {
+      toast.error(`Transaction failed! ${error}`);
+    },
+  });
+}

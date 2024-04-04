@@ -6,7 +6,7 @@ import { IconRefresh, IconArrowUpRight } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { AppModal, ellipsify } from '../ui/ui-layout';
 import { ExplorerLink } from '../cluster/cluster-ui';
-import { useCancelBet, useGetBets, useGetBetsByJudge, useGetBetsByMaker, useGetBetsByTaker, useMakeBet } from './bet-data-access';
+import { useCancelBet, useDeclineBet, useGetBets, useGetBetsByJudge, useGetBetsByMaker, useGetBetsByTaker, useMakeBet, useSettleBet, useTakeBet } from './bet-data-access';
 
 export function BetsList({ address, filterBy = "any" }: { address: PublicKey, filterBy?: string }) {
   const [showAll, setShowAll] = useState(false);
@@ -293,6 +293,91 @@ export function BetMakerButtons({ address, maker }: { address: PublicKey, maker?
           }}
         >
           Cancel Bet
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function BetTakerButtons({ address, taker }: { address: PublicKey, taker?: PublicKey }) {
+  const wallet = useWallet();
+  const mutationDecline = useDeclineBet({ address });
+  const mutationTake = useTakeBet({ address });
+
+  return (
+    <div>
+      <div className="space-x-2">
+        <button
+          disabled={!taker || wallet.publicKey?.toString() !== taker?.toString()}
+          className="btn btn-xs lg:btn-md btn-outline"
+          onClick={() => {
+            mutationTake
+              .mutateAsync()
+              .then(() => {
+              });
+          }}
+        >
+          Take Bet
+        </button>
+        <button
+          disabled={!taker || wallet.publicKey?.toString() !== taker?.toString()}
+          className="btn btn-xs lg:btn-md btn-outline"
+          onClick={() => {
+            mutationDecline
+              .mutateAsync()
+              .then(() => {
+              });
+          }}
+        >
+          Decline Bet
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function BetJudgeButtons({ address, judge }: { address: PublicKey, judge?: PublicKey }) {
+  const wallet = useWallet();
+  const mutation = useSettleBet({ address });
+
+  return (
+    <div>
+      <div className="space-x-2">
+        <button
+          disabled={!judge || wallet.publicKey?.toString() !== judge?.toString()}
+          className="btn btn-xs lg:btn-md btn-outline"
+          onClick={() => {
+            mutation
+              .mutateAsync({ winner: 0})
+              .then(() => {
+              });
+          }}
+        >
+          Refund Bet
+        </button>
+        <button
+          disabled={!judge || wallet.publicKey?.toString() !== judge?.toString()}
+          className="btn btn-xs lg:btn-md btn-outline"
+          onClick={() => {
+            mutation
+              .mutateAsync({ winner: 1})
+              .then(() => {
+              });
+          }}
+        >
+          Maker wins
+        </button>
+        <button
+          disabled={!judge || wallet.publicKey?.toString() !== judge?.toString()}
+          className="btn btn-xs lg:btn-md btn-outline"
+          onClick={() => {
+            mutation
+              .mutateAsync({ winner: 2})
+              .then(() => {
+              });
+          }}
+        >
+          Taker wins
         </button>
       </div>
     </div>
